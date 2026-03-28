@@ -312,7 +312,6 @@
   <footer>argus-resumo v2.1 · claude haiku</footer>
 
   <script>
-    // ⚠️ Substitua pela URL da sua implantação do GAS
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxuedSXHa0TcP38tNSfCqAhisoIszpoEW9bFa5pUSqqqSjhNE5GqzseITMg_PdP4GCSpw/exec";
 
     const LABELS = {
@@ -321,15 +320,50 @@
     };
     let clientes = [];
 
-    document.addEventListener('DOMContentLoaded', async () => {
+    // JSONP — único método que funciona com GAS de domínio externo
+    function jsonp(url, callback) {
+      const name  = 'cb_' + Date.now();
+      let   done  = false;
+
+      // Timeout de 90s (Claude pode demorar em grupos com muitas mensagens)
+      const timer = setTimeout(function() {
+        if (done) return;
+        done = true;
+        try { delete window[name]; document.head.removeChild(script); } catch(e){}
+        callback(new Error('Tempo esgotado. Tente novamente.'));
+      }, 30000);
+
+      window[name] = function(data) {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        try { delete window[name]; document.head.removeChild(script); } catch(e){}
+        callback(null, data);
+      };
+
+      const script = document.createElement('script');
+      script.src   = url + (url.includes('?') ? '&' : '?') + 'callback=' + name;
+      script.onerror = function() {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        try { delete window[name]; document.head.removeChild(script); } catch(e){}
+        callback(new Error('Erro de conexão.'));
+      };
+      document.head.appendChild(script);
+    }
+
+    // Carrega clientes ao abrir
+    document.addEventListener('DOMContentLoaded', function() {
       const sel = document.getElementById('sel-cliente');
-      try {
-        const r = await fetch(GAS_URL + '?action=clientes');
-        const j = await r.json();
-        if (!j.ok) throw new Error(j.erro);
+      jsonp(GAS_URL + '?action=clientes', function(err, j) {
+        if (err || !j.ok) {
+          sel.innerHTML = '<option>Erro: ' + (err ? err.message : j.erro) + '</option>';
+          return;
+        }
         clientes = j.data;
         sel.innerHTML = '<option value="">— escolha um cliente —</option>';
-        clientes.forEach((c, i) => {
+        clientes.forEach(function(c, i) {
           const o = document.createElement('option');
           o.value = i;
           o.textContent = c.cliente + (c.nomeGrupo ? ' · ' + c.nomeGrupo : '');
@@ -337,9 +371,7 @@
         });
         sel.disabled = false;
         sel.addEventListener('change', onClienteChange);
-      } catch(e) {
-        sel.innerHTML = '<option>Erro: ' + esc(e.message) + '</option>';
-      }
+      });
     });
 
     function onClienteChange() {
@@ -362,7 +394,6 @@
       if (c.responsavel) {
         meta.innerHTML += '<span class="chip resp">'+esc(c.responsavel)+'</span>';
       }
-
       ew.classList.add('show');
       btn.disabled = false;
     }
@@ -384,7 +415,7 @@
         '<div class="skel full"></div><div class="skel med"></div><div class="skel short"></div>' +
         '<div class="skel full" style="margin-top:16px"></div><div class="skel med"></div>';
 
-      setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'start' }), 60);
+      setTimeout(function(){ card.scrollIntoView({ behavior:'smooth', block:'start' }); }, 60);
 
       const url = GAS_URL + '?action=resumo' +
         '&grupoId='     + encodeURIComponent(c.grupoId) +
@@ -393,7 +424,7 @@
 
       jsonp(url, function(err, j) {
         if (err || !j.ok) {
-          inn.innerHTML = '<div class="erro-box">ERRO: ' + (err ? err.message : esc(j.erro)) + '</div>';
+          inn.innerHTML = '<div class="erro-box">ERRO: ' + esc(err ? err.message : j.erro) + '</div>';
         } else {
           renderRes(c, j.data);
         }
@@ -405,8 +436,10 @@
       const inn = document.getElementById('result-inner');
       const sugsHTML = d.sugestoes && d.sugestoes.length
         ? '<p class="sec-lbl">Sugestão de ação</p><ul class="sugs">' +
-          d.sugestoes.map((s,i)=>'<li><span class="bullet">0'+(i+1)+'</span><span>'+esc(s)+'</span></li>').join('') +
-          '</ul>' : '';
+          d.sugestoes.map(function(s,i){
+            return '<li><span class="bullet">0'+(i+1)+'</span><span>'+esc(s)+'</span></li>';
+          }).join('') + '</ul>'
+        : '';
       inn.innerHTML =
         '<div class="res-header fade">' +
           '<span class="res-title">'+esc(c.cliente)+'</span>' +
