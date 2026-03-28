@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Argus · Resumo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #0b0e14;
+      --surface: #121620;
+      --border:  #1e2535;
+      --accent:  #00d4ff;
+      --accent2: #7c5cfc;
+      --green:   #00e5a0;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --danger:  #ff4d6d;
+      --gold:    #ffc400;
+      --silver:  #b4c8e6;
+      --mono:    'Space Mono', monospace;
+      --sans:    'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      padding: 0 16px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-image: radial-gradient(ellipse 80% 40% at 50% -5%, rgba(0,212,255,.07) 0%, transparent 60%);
+    }
+
+    /* ── HEADER ─────────────────────────────── */
+    header {
+      width: 100%;
+      max-width: 720px;
+      padding: 40px 0 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-eye { width: 36px; height: 36px; flex-shrink: 0; }
+
+    h1 {
+      font-family: var(--mono);
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      line-height: 1.2;
+    }
+    h1 span { color: var(--accent); }
+
+    .subtitle {
+      font-size: .75rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      letter-spacing: .04em;
+      margin-top: 3px;
+    }
+
+    /* ── MAIN ───────────────────────────────── */
+    main { width: 100%; max-width: 720px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      width: 100%;
+    }
+
+    .lbl {
+      display: block;
+      font-family: var(--mono);
+      font-size: .68rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* ── SELECT ─────────────────────────────── */
+    .sel-wrap { position: relative; width: 100%; }
+
+    select {
+      width: 100%;
+      height: 52px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 1rem;
+      padding: 0 44px 0 16px;
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: border-color .2s;
+    }
+    select:focus { border-color: var(--accent); }
+    select:disabled { opacity: .4; cursor: not-allowed; }
+
+    .sel-arrow {
+      position: absolute; right: 16px; top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none; color: var(--muted); font-size: .7rem;
+    }
+
+    /* ── CHIPS ──────────────────────────────── */
+    .meta { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 20px;
+      font-size: .75rem; font-family: var(--mono);
+      border: 1px solid var(--border); color: var(--muted);
+    }
+    .chip.ouro  { border-color: rgba(255,196,0,.4);   color: var(--gold);   background: rgba(255,196,0,.07); }
+    .chip.prata { border-color: rgba(180,200,230,.3); color: var(--silver); background: rgba(180,200,230,.06); }
+    .chip.resp  { border-color: rgba(0,229,160,.3);   color: var(--green);  background: rgba(0,229,160,.05); }
+
+    /* ── ESCOPO ─────────────────────────────── */
+    .escopo-wrap {
+      overflow: hidden; max-height: 0; opacity: 0;
+      transition: max-height .35s ease, opacity .3s ease;
+    }
+    .escopo-wrap.show { max-height: 160px; opacity: 1; margin-top: 20px; }
+
+    /* ── BOTÃO ──────────────────────────────── */
+    .btn {
+      margin-top: 20px; width: 100%; height: 54px;
+      border: none; border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: #000; font-family: var(--mono);
+      font-size: .88rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      cursor: pointer; transition: opacity .2s, transform .15s;
+    }
+    .btn:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+    .btn:active:not(:disabled) { transform: translateY(0); opacity: .8; }
+    .btn:disabled { opacity: .3; cursor: not-allowed; }
+
+    /* ── SKELETON ───────────────────────────── */
+    .skel {
+      background: linear-gradient(90deg, var(--border) 25%, #1e2d40 50%, var(--border) 75%);
+      background-size: 200% 100%; animation: shimmer 1.4s infinite;
+      border-radius: 6px; height: 14px; margin-bottom: 12px;
+    }
+    .skel.full{width:100%} .skel.med{width:78%} .skel.short{width:50%}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    .spin-row {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--muted); font-family: var(--mono);
+      font-size: .78rem; letter-spacing: .04em; margin-bottom: 20px;
+    }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin .8s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── RESULTADO ──────────────────────────── */
+    .res-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 10px;
+      margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .res-title {
+      font-family: var(--mono); font-size: .72rem;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--accent);
+    }
+    .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag {
+      font-family: var(--mono); font-size: .68rem;
+      color: var(--muted); border: 1px solid var(--border);
+      padding: 4px 10px; border-radius: 5px;
+    }
+    .tag.esc { border-color: rgba(0,212,255,.25); color: var(--accent); }
+
+    .sec-lbl {
+      font-family: var(--mono); font-size: .65rem;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .sec-lbl::after { content:''; flex:1; height:1px; background: var(--border); }
+
+    .resumo-box {
+      font-size: .97rem; line-height: 1.75; color: var(--text);
+      padding: 16px 18px;
+      background: rgba(0,212,255,.04);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      margin-bottom: 24px; white-space: pre-line;
+    }
+
+    .sugs { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .sugs li {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 14px 16px;
+      background: rgba(124,92,252,.06); border: 1px solid rgba(124,92,252,.18);
+      border-radius: 10px; font-size: .92rem; line-height: 1.6;
+      transition: border-color .2s;
+    }
+    .sugs li:hover { border-color: rgba(124,92,252,.4); }
+    .bullet {
+      font-family: var(--mono); font-size: .68rem;
+      color: var(--accent2); min-width: 20px; padding-top: 2px; flex-shrink: 0;
+    }
+
+    .erro-box {
+      padding: 16px; background: rgba(255,77,109,.08);
+      border: 1px solid rgba(255,77,109,.3); border-radius: 10px;
+      color: var(--danger); font-family: var(--mono);
+      font-size: .8rem; line-height: 1.6;
+    }
+
+    footer {
+      margin-top: 40px; font-family: var(--mono); font-size: .65rem;
+      color: var(--muted); letter-spacing: .06em; text-align: center; opacity: .4;
+    }
+
+    .fade { animation: fd .35s ease forwards; }
+    @keyframes fd{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+    /* ── MOBILE ─────────────────────────────── */
+    @media (max-width: 600px) {
+      body { padding: 0 12px 60px; }
+
+      header {
+        padding: 24px 0 20px;
+        margin-bottom: 20px;
+        gap: 12px;
+      }
+      .logo-eye { width: 30px; height: 30px; }
+      h1 { font-size: 1rem; }
+      .subtitle { font-size: .68rem; }
+
+      .card { padding: 18px 16px; }
+
+      select { height: 54px; font-size: 1rem; }
+
+      .btn { height: 56px; font-size: .85rem; }
+
+      .resumo-box { font-size: 1rem; line-height: 1.8; padding: 16px; }
+
+      .sugs li { font-size: .95rem; padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <svg class="logo-eye" viewBox="0 0 36 36" fill="none">
+      <circle cx="18" cy="18" r="17" stroke="#1e2535" stroke-width="1.5"/>
+      <path d="M4 18C4 18 9.5 8 18 8C26.5 8 32 18 32 18C32 18 26.5 28 18 28C9.5 28 4 18 4 18Z" stroke="#00d4ff" stroke-width="1.5" fill="rgba(0,212,255,.08)"/>
+      <circle cx="18" cy="18" r="5" fill="#00d4ff" opacity=".9"/>
+      <circle cx="18" cy="18" r="2.5" fill="#0b0e14"/>
+      <circle cx="19.5" cy="16.5" r="1" fill="#00d4ff" opacity=".6"/>
+    </svg>
+    <div>
+      <h1>ARGUS · <span>RESUMO</span></h1>
+      <p class="subtitle">marvee · franquia 1455</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <span class="lbl">1 · Selecionar cliente</span>
+      <div class="sel-wrap">
+        <select id="sel-cliente" disabled>
+          <option value="">Carregando clientes...</option>
+        </select>
+        <span class="sel-arrow">▼</span>
+      </div>
+      <div class="meta" id="meta"></div>
+
+      <div class="escopo-wrap" id="escopo-wrap">
+        <span class="lbl" style="margin-top:4px">2 · O que trazer?</span>
+        <div class="sel-wrap">
+          <select id="sel-escopo">
+            <option value="hoje">📅 Todas de hoje (cliente + time)</option>
+            <option value="ontem">📅 Ontem / último dia útil (cliente + time)</option>
+            <option value="ultimas10">Últimas 10 mensagens</option>
+            <option value="ultimas30" selected>Últimas 30 mensagens</option>
+            <option value="ultimas50">Últimas 50 mensagens</option>
+          </select>
+          <span class="sel-arrow">▼</span>
+        </div>
+      </div>
+
+      <button class="btn" id="btn" disabled onclick="resumir()">Resumir</button>
+    </div>
+
+    <div class="card" id="result-card" style="display:none">
+      <div id="result-inner"></div>
+    </div>
+  </main>
+
+  <footer>argus-resumo v2.1 · claude haiku</footer>
+
+  <script>
+    // ⚠️ Substitua pela URL da sua implantação do GAS
+    const GAS_URL = "COLE_AQUI_A_URL_DO_GAS";
+
+    const LABELS = {
+      hoje:'Hoje', ontem:'Ontem / Últ. dia útil',
+      ultimas10:'Últimas 10', ultimas30:'Últimas 30', ultimas50:'Últimas 50'
+    };
+    let clientes = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const sel = document.getElementById('sel-cliente');
+      try {
+        const r = await fetch(GAS_URL + '?action=clientes');
+        const j = await r.json();
+        if (!j.ok) throw new Error(j.erro);
+        clientes = j.data;
+        sel.innerHTML = '<option value="">— escolha um cliente —</option>';
+        clientes.forEach((c, i) => {
+          const o = document.createElement('option');
+          o.value = i;
+          o.textContent = c.cliente + (c.nomeGrupo ? ' · ' + c.nomeGrupo : '');
+          sel.appendChild(o);
+        });
+        sel.disabled = false;
+        sel.addEventListener('change', onClienteChange);
+      } catch(e) {
+        sel.innerHTML = '<option>Erro: ' + esc(e.message) + '</option>';
+      }
+    });
+
+    function onClienteChange() {
+      const idx  = document.getElementById('sel-cliente').value;
+      const meta = document.getElementById('meta');
+      const ew   = document.getElementById('escopo-wrap');
+      const btn  = document.getElementById('btn');
+
+      meta.innerHTML = ''; btn.disabled = true; ew.classList.remove('show');
+      if (idx === '') return;
+      const c = clientes[parseInt(idx)];
+      if (!c) return;
+
+      if (c.tier) {
+        const t  = c.tier.toUpperCase();
+        const em = t==='OURO'?'🟡':t==='PRATA'?'⚪':'';
+        const cl = t==='OURO'?'ouro':t==='PRATA'?'prata':'';
+        meta.innerHTML += '<span class="chip '+cl+'">'+em+' '+c.tier.toLowerCase()+'</span>';
+      }
+      if (c.responsavel) {
+        meta.innerHTML += '<span class="chip resp">'+esc(c.responsavel)+'</span>';
+      }
+
+      ew.classList.add('show');
+      btn.disabled = false;
+    }
+
+    async function resumir() {
+      const idx    = document.getElementById('sel-cliente').value;
+      const escopo = document.getElementById('sel-escopo').value;
+      if (idx === '') return;
+
+      const c    = clientes[parseInt(idx)];
+      const btn  = document.getElementById('btn');
+      const card = document.getElementById('result-card');
+      const inn  = document.getElementById('result-inner');
+
+      btn.disabled = true;
+      card.style.display = 'block';
+      inn.innerHTML =
+        '<div class="spin-row"><div class="spinner"></div><span>Consultando '+esc(c.cliente)+'…</span></div>' +
+        '<div class="skel full"></div><div class="skel med"></div><div class="skel short"></div>' +
+        '<div class="skel full" style="margin-top:16px"></div><div class="skel med"></div>';
+
+      setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'start' }), 60);
+
+      try {
+        const url = GAS_URL + '?action=resumo' +
+          '&grupoId='     + encodeURIComponent(c.grupoId) +
+          '&nomeCliente=' + encodeURIComponent(c.cliente) +
+          '&escopo='      + encodeURIComponent(escopo);
+        const r = await fetch(url);
+        const j = await r.json();
+        if (!j.ok) throw new Error(j.erro);
+        renderRes(c, j.data);
+      } catch(e) {
+        inn.innerHTML = '<div class="erro-box">ERRO: '+esc(e.message)+'</div>';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function renderRes(c, d) {
+      const inn = document.getElementById('result-inner');
+      const sugsHTML = d.sugestoes && d.sugestoes.length
+        ? '<p class="sec-lbl">Sugestão de ação</p><ul class="sugs">' +
+          d.sugestoes.map((s,i)=>'<li><span class="bullet">0'+(i+1)+'</span><span>'+esc(s)+'</span></li>').join('') +
+          '</ul>' : '';
+      inn.innerHTML =
+        '<div class="res-header fade">' +
+          '<span class="res-title">'+esc(c.cliente)+'</span>' +
+          '<div class="tags">' +
+            '<span class="tag esc">'+esc(LABELS[d.escopo]||d.escopo)+'</span>' +
+            '<span class="tag">'+d.totalMensagens+' msg</span>' +
+          '</div>' +
+        '</div>' +
+        '<p class="sec-lbl">Resumo</p>' +
+        '<div class="resumo-box fade">'+esc(d.resumo)+'</div>' +
+        sugsHTML;
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>
