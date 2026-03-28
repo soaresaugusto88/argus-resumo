@@ -367,7 +367,7 @@
       btn.disabled = false;
     }
 
-    async function resumir() {
+    function resumir() {
       const idx    = document.getElementById('sel-cliente').value;
       const escopo = document.getElementById('sel-escopo').value;
       if (idx === '') return;
@@ -386,20 +386,19 @@
 
       setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'start' }), 60);
 
-      try {
-        const url = GAS_URL + '?action=resumo' +
-          '&grupoId='     + encodeURIComponent(c.grupoId) +
-          '&nomeCliente=' + encodeURIComponent(c.cliente) +
-          '&escopo='      + encodeURIComponent(escopo);
-        const r = await fetch(url, {redirect: 'follow'});
-        const j = await r.json();
-        if (!j.ok) throw new Error(j.erro);
-        renderRes(c, j.data);
-      } catch(e) {
-        inn.innerHTML = '<div class="erro-box">ERRO: '+esc(e.message)+'</div>';
-      } finally {
+      const url = GAS_URL + '?action=resumo' +
+        '&grupoId='     + encodeURIComponent(c.grupoId) +
+        '&nomeCliente=' + encodeURIComponent(c.cliente) +
+        '&escopo='      + encodeURIComponent(escopo);
+
+      jsonp(url, function(err, j) {
+        if (err || !j.ok) {
+          inn.innerHTML = '<div class="erro-box">ERRO: ' + (err ? err.message : esc(j.erro)) + '</div>';
+        } else {
+          renderRes(c, j.data);
+        }
         btn.disabled = false;
-      }
+      });
     }
 
     function renderRes(c, d) {
