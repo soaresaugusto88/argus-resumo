@@ -313,7 +313,7 @@
 
   <script>
     // ⚠️ Substitua pela URL da sua implantação do GAS
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxuedSXHa0TcP38tNSfCqAhisoIszpoEW9bFa5pUSqqqSjhNE5GqzseITMg_PdP4GCSpw/exec";
+    const GAS_URL = "COLE_AQUI_A_URL_DO_GAS";
 
     const LABELS = {
       hoje:'Hoje', ontem:'Ontem / Últ. dia útil',
@@ -391,7 +391,7 @@
           '&grupoId='     + encodeURIComponent(c.grupoId) +
           '&nomeCliente=' + encodeURIComponent(c.cliente) +
           '&escopo='      + encodeURIComponent(escopo);
-        const r = await fetch(url);
+        const r = await fetch(url, {redirect: 'follow'});
         const j = await r.json();
         if (!j.ok) throw new Error(j.erro);
         renderRes(c, j.data);
